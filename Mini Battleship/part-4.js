@@ -3,6 +3,9 @@ const rs = require('readline-sync');
 let boardSize = 0;
 let shipsRemaining = 5;
 let pastAttacks = [];
+let compPastAttacks = [];
+let playerShipsRemain = 5;
+
 
 
 
@@ -64,12 +67,11 @@ function createBoard() {
   } 
   return board;
 }
-
-function displayBoard2() {
-  console.log(playerBoard.map(row => row.map(cell => (cell  ? 'S' : '_')).join(' ')).join('\n'));
+function displayBoard2(board) {
+  console.log(board.map(row => row.map(cell => (cell  ? 'S' : '_')).join(' ')).join('\n'));
 }
 
-function displayBoard() {
+function displayBoard(board) {
     let headerRow = '   ';
     for (let col = 1; col <= board.length; col++) {
       headerRow += `  ${col} `;
@@ -96,7 +98,7 @@ function displayBoard() {
 
 
 
-  function placeShips(playerBoard) {
+  function placeShips(board) {
     for(let i = 0; i < shipNames.length; i++) {
         let row, col, direction;
         let length = ships[shipNames[i]].length;
@@ -105,7 +107,7 @@ function displayBoard() {
             direction = Math.floor(Math.random() * 2);
             row = Math.floor(Math.random() * boardSize);
             col = Math.floor(Math.random() * boardSize);
-        } while(!isValidPlacement(playerBoard, row, col, length, direction ));
+        } while(!isValidPlacement(board, row, col, length, direction ));
 
         for (let j = 0; j < length; j++) {
             if (direction === 0) {
@@ -119,7 +121,7 @@ function displayBoard() {
     } 
 }
   
-  function isValidPlacement(playerBoard, startRow, startCol, length, direction) {
+  function isValidPlacement(board, startRow, startCol, length, direction) {
     if (
       (direction === 0 && startCol + length > boardSize) ||
       (direction === 1 && startRow + length > boardSize)
@@ -128,9 +130,9 @@ function displayBoard() {
     }
   
     for (let i = 0; i < length; i++) {
-      if (direction === 0 && playerBoard[startRow][startCol + i]) {
+      if (direction === 0 && board[startRow][startCol + i]) {
         return false; 
-      } else if (direction === 1 && playerBoard[startRow + i][startCol]) {
+      } else if (direction === 1 && board[startRow + i][startCol]) {
         return false; 
       }
     }
@@ -155,17 +157,17 @@ function parseUserInput(input) {
   return [-1, -1];
 }
 
-function strikeTurn() {
+function strikeTurn(board) {
   while(shipsRemaining > 0) {
     const strikeInput = rs.question('Enter a location to strike ie, "A2" -> ').toUpperCase();
     const [col, row] = parseUserInput(strikeInput);
 
     if(strikeInput === "H4X") {
-        displayBoard2();
+        displayBoard2(board);
     } 
 
     if(pastAttacks.includes(strikeInput)) {
-        displayBoard();
+        displayBoard(board);
         console.log("You have already picked this location. Miss!");
     }
 
@@ -176,16 +178,15 @@ function strikeTurn() {
 
     if(board[row][col] && !pastAttacks.includes(strikeInput)) {
       board[row][col] = 'X';
-      displayBoard();
+      displayBoard(board);
       console.log(`Hit!`);
       updateHits(row, col);
     } else if(board[row][col] && pastAttacks.includes(strikeInput)) {
         continue;
     } else if (!board[row][col] && !pastAttacks.includes(strikeInput)){
         board[row][col] = `O`;
-        displayBoard();
+        displayBoard(board);
         console.log("You missed");
-
     }
       
     pastAttacks.push(strikeInput);
@@ -239,9 +240,13 @@ function playGame() {
     const playerBoard = createBoard();
     const compBoard = createBoard();
     placeShips(playerBoard);
-    displayBoard2();
-    displayBoard();
-    strikeTurn();
+    placeShips(compBoard);
+    console.log('this is player board')
+    displayBoard2(playerBoard);
+    console.log('this is comp board')
+    displayBoard2(compBoard);
+    displayBoard(playerBoard);
+    strikeTurn(playerBoard);
     endOfGame();
   }
 }
