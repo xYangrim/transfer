@@ -1,11 +1,8 @@
 const rs = require('readline-sync');
-
+let board = [];
 let boardSize = 0;
 let shipsRemaining = 5;
 let pastAttacks = [];
-let compPastAttacks = [];
-let playerShipsRemain = 5;
-
 
 
 
@@ -60,18 +57,16 @@ function createBoardSize() {
 }
 
 function createBoard() {
-    const board = [];
-
     for(let i = 0; i < boardSize; i++) {
     board.push(Array(boardSize).fill(false))
   } 
-  return board;
 }
-function displayBoard2(board) {
+
+function displayBoard2() {
   console.log(board.map(row => row.map(cell => (cell  ? 'S' : '_')).join(' ')).join('\n'));
 }
 
-function displayBoard(board) {
+function displayBoard() {
     let headerRow = '   ';
     for (let col = 1; col <= board.length; col++) {
       headerRow += `  ${col} `;
@@ -98,7 +93,7 @@ function displayBoard(board) {
 
 
 
-  function placeShips(board) {
+  function placeShips() {
     for(let i = 0; i < shipNames.length; i++) {
         let row, col, direction;
         let length = ships[shipNames[i]].length;
@@ -107,7 +102,7 @@ function displayBoard(board) {
             direction = Math.floor(Math.random() * 2);
             row = Math.floor(Math.random() * boardSize);
             col = Math.floor(Math.random() * boardSize);
-        } while(!isValidPlacement(board, row, col, length, direction ));
+        } while(!isValidPlacement(row, col, length, direction ));
 
         for (let j = 0; j < length; j++) {
             if (direction === 0) {
@@ -121,7 +116,7 @@ function displayBoard(board) {
     } 
 }
   
-  function isValidPlacement(board, startRow, startCol, length, direction) {
+  function isValidPlacement(startRow, startCol, length, direction) {
     if (
       (direction === 0 && startCol + length > boardSize) ||
       (direction === 1 && startRow + length > boardSize)
@@ -157,17 +152,17 @@ function parseUserInput(input) {
   return [-1, -1];
 }
 
-function strikeTurn(board) {
+function strikeTurn() {
   while(shipsRemaining > 0) {
     const strikeInput = rs.question('Enter a location to strike ie, "A2" -> ').toUpperCase();
     const [col, row] = parseUserInput(strikeInput);
 
     if(strikeInput === "H4X") {
-        displayBoard2(board);
+        displayBoard2();
     } 
 
     if(pastAttacks.includes(strikeInput)) {
-        displayBoard(board);
+        displayBoard();
         console.log("You have already picked this location. Miss!");
     }
 
@@ -178,15 +173,16 @@ function strikeTurn(board) {
 
     if(board[row][col] && !pastAttacks.includes(strikeInput)) {
       board[row][col] = 'X';
-      displayBoard(board);
+      displayBoard();
       console.log(`Hit!`);
       updateHits(row, col);
     } else if(board[row][col] && pastAttacks.includes(strikeInput)) {
         continue;
     } else if (!board[row][col] && !pastAttacks.includes(strikeInput)){
         board[row][col] = `O`;
-        displayBoard(board);
+        displayBoard();
         console.log("You missed");
+
     }
       
     pastAttacks.push(strikeInput);
@@ -237,20 +233,16 @@ function playGame() {
     const startGame = rs.keyInPause('Press any key to start... ');
     console.log("Game is starting!");
     createBoardSize();
-    const playerBoard = createBoard();
-    const compBoard = createBoard();
-    placeShips(playerBoard);
-    placeShips(compBoard);
-    console.log('this is player board')
-    displayBoard2(playerBoard);
-    console.log('this is comp board')
-    displayBoard2(compBoard);
-    displayBoard(playerBoard);
-    strikeTurn(compBoard);
+    createBoard();
+    placeShips();
+    displayBoard2();
+    displayBoard();
+    strikeTurn();
     endOfGame();
   }
 }
 
 playGame();
+
 
 
