@@ -1,15 +1,15 @@
 const rs = require('readline-sync');
-
+const _ = require('lodash');
 let boardSize = 0;
 let shipsRemaining = 5;
+let compShipsRemaining = 5;
 let pastAttacks = [];
 let compPastAttacks = [];
-let playerShipsRemain = 5;
+let playerTurn = true;
 
 
 
-
-const ships = {
+const tests = {
     destroyer: {
         name: "destroyer",
         length: 2,
@@ -42,8 +42,12 @@ const ships = {
     }
 };
 
+const ships = _.cloneDeep(tests);
+const compShips = _.cloneDeep(tests);
 
+const compShipNames = Object.keys(compShips);
 const shipNames = Object.keys(ships);
+
 
 
 
@@ -68,6 +72,7 @@ function createBoard() {
   return board;
 }
 function displayBoard2(board) {
+  // edit code to show not sure an 'S' on missed locations
   console.log(board.map(row => row.map(cell => (cell  ? 'S' : '_')).join(' ')).join('\n'));
 }
 
@@ -158,7 +163,7 @@ function parseUserInput(input) {
 }
 
 function strikeTurn(board) {
-  while(shipsRemaining > 0) {
+  while(playerTurn === true) {
     const strikeInput = rs.question('Enter a location to strike ie, "A2" -> ').toUpperCase();
     const [col, row] = parseUserInput(strikeInput);
 
@@ -197,13 +202,21 @@ function strikeTurn(board) {
 function updateHits(row, col) {
     for (const shipName in ships) {
         if (ships.hasOwnProperty(shipName)) {
-            const ship = ships[shipName];
-            if (ship.position.some(pos => pos[0] === row && pos[1] === col)) {
-                ship.hits += 1;
-                if (ship.hits === ship.length) {
+            const ship = {...ships[shipName]};
+            console.log(`Before Checking attack ${ships[shipName].hits}`)
+            console.log(`shipName before if Statement ${ships[shipName].name}`)
+            if (ships[shipName].position.some(pos => pos[0] === row && pos[1] === col)) {
+            console.log(`shipName after if Statement ${ships[shipName].name}`)
+            console.log(`Before ship.hits +1: name: ${ships[shipName].name} & ship.hits =  ${ships[shipName].hits} & ship.length = ${ships[shipName].length} `)
+            ships[shipName].hits += 1;
+            console.log(`After ship.hits +1 -name: ${ships[shipName].name} & ship.hits =  ${ships[shipName].hits} & ship.length = ${ships[shipName].length} `)
+                if (ships[shipName].hits === ships[shipName].length) {
+                  console.log(`if ship.hits === ship.length: ${ships[shipName].hits} length = ${ships[shipName].length}`)
                     --shipsRemaining;
-                    console.log(`You sunk the ${ship.name}, ${shipsRemaining} Ships Remaining!`);
-                    delete ship[shipName];
+                    console.log(`You sunk the ${ships[shipName].name}, ${shipsRemaining} Ships Remaining!`);
+                    console.log(`before deleted ship = ${ships[shipName]}`)
+                    delete ships[shipName];
+                    console.log(`deleted ship = ${ships[shipName]}`)
                 }
                 break;
             }
@@ -252,5 +265,4 @@ function playGame() {
 }
 
 playGame();
-
 
